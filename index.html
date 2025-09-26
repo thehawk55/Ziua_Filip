@@ -533,82 +533,46 @@
     </div>
 
     <script>
-        function submitRSVP(response) {
-            const name = document.getElementById('childName').value.trim();
-            
-            if (!name) {
-                alert('🤭 Hei, nu uita să îți scrii numele!');
-                document.getElementById('childName').focus();
-                return;
-            }
-
-            // Show loading
-            document.getElementById('rsvpForm').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-
-            // Prepare form data for Formspree
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('response', response);
-            formData.append('event', 'Filip - 7 ani - 4 Octombrie 2024');
-            formData.append('_replyto', 'horia.muntean@yahoo.com');
-            formData.append('_subject', `RSVP pentru Filip: ${name} - ${response}`);
-
-            // Submit to Formspree
-            fetch('https://formspree.io/f/xgveqrko', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Success
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .catch(error => {
-                // Error fallback - create mailto link
-                console.log('Formspree failed, using mailto fallback');
-                document.getElementById('loading').style.display = 'none';
-                
-                const subject = encodeURIComponent(`RSVP Filip: ${name} - ${response}`);
-                const body = encodeURIComponent(`Nume copil: ${name}\nRăspuns: ${response}\nEveniment: Filip - 7 ani - 4 Octombrie 2024, Zingoplanet Sibiu`);
-                const mailtoLink = `mailto:horia.muntean@yahoo.com?subject=${subject}&body=${body}`;
-                
-                window.location.href = mailtoLink;
-                
-                // Show success message anyway
-                document.getElementById('successMessage').innerHTML = '📧 Se deschide aplicația de email...<br>Mulțumesc pentru răspuns! 😊';
-                document.getElementById('successMessage').style.display = 'block';
-            });
+    function submitRSVP(response) {
+        const name = document.getElementById('childName').value.trim();
+        
+        if (!name) {
+            alert('🤭 Hei, nu uita să îți scrii numele!');
+            document.getElementById('childName').focus();
+            return;
         }
 
-        // Add some fun interactions
-        document.addEventListener('DOMContentLoaded', function() {
-            // Make emojis clickable for fun
-            document.querySelectorAll('.floating-emoji').forEach(emoji => {
-                emoji.addEventListener('click', function() {
-                    this.style.animation = 'none';
-                    setTimeout(() => {
-                        this.style.animation = 'floatAround 2s ease-in-out infinite';
-                    }, 100);
-                });
-            });
+        // Show loading
+        document.getElementById('rsvpForm').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
 
-            // Add some keyboard interactions
-            document.getElementById('childName').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    // Focus on the first button
-                    document.querySelector('.yes-btn').focus();
-                }
-            });
+        // Google Apps Script Web App URL
+        const webAppURL = 'https://script.google.com/macros/s/1zbHWrDIcCUdUWjkOkY09RkWdlSrn_v8zXyGNGRXctMo1m_6FXsE7X3ik/exec';
+        const data = {
+            name: name,
+            response: response,
+            event: 'Filip - 7 ani - 4 Octombrie 2024'
+        };
+
+        // Submit to Google Apps Script
+        fetch(webAppURL, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(() => {
+            // Success
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('A apărut o problemă la trimiterea răspunsului. Încearcă din nou!');
         });
-    </script>
+    }
+</script>
 </body>
+
 </html>
