@@ -514,86 +514,108 @@
             </div>
         </div>
 
-        <div class="rsvp-section">
+        <div class="rsvp-section" id="rsvpSection">
             <div class="rsvp-title">Vii sau nu vii? 🤔</div>
             <div class="rsvp-subtitle">Spune-ne dacă te alături aventurii!</div>
             
+            <!-- This form will be handled by JavaScript -->
             <form id="rsvpForm">
                 <input 
                     type="text" 
                     id="childName" 
+                    name="child_name" <!-- We give it a name -->
                     class="name-input" 
                     placeholder="Scrie numele tău aici... 😊" 
                     required
                 >
                 
                 <div class="response-buttons">
-                    <button type="button" class="response-btn yes-btn" onclick="submitRSVP('Da')">
-                        🎉 DAAA!    Vin și aduc multă energie! 🎉
+                    <!-- The buttons now submit the form -->
+                    <button type="submit" name="user_response" value="Da" class="response-btn yes-btn">
+                        🎉 DAAA! Vin și aduc multă energie! 🎉
                     </button>
                     
-                    <button type="button" class="response-btn no-btn" onclick="submitRSVP('Nu')">
+                    <button type="submit" name="user_response" value="Nu" class="response-btn no-btn">
                         😢 Nu pot să vin... 😢
                     </button>
                 </div>
             </form>
-
+        
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <div style="margin-top: 10px;">Trimit răspunsul...</div>
             </div>
-
-            <div class="success-message" id="successMessage">
-                🎊 Mulțumesc pentru răspuns! 🎊<br>
-                Filip va fi super fericit să știe! 😄
-            </div>
         </div>
-    </div>
+        
+        <!-- This success message is now outside the RSVP section -->
+        <div class="success-message" id="successMessage" style="display: none; margin: 20px;">
+            🎊 Mulțumesc pentru răspuns! 🎊<br>
+            Filip va fi super fericit să știe! 😄
+        </div>
 
     <script>
-    function submitRSVP(response) {
-        const name = document.getElementById('childName').value.trim();
-        
-        if (!name) {
-            alert('🤭 Hei, nu uita să îți scrii numele!');
-            document.getElementById('childName').focus();
-            return;
-        }
-
-        // Show loading
-        document.getElementById('rsvpForm').style.display = 'none';
-        document.getElementById('loading').style.display = 'block';
-
-        // Google Apps Script Web App URL
-        const webAppURL = 'https://script.google.com/macros/s/1zbHWrDIcCUdUWjkOkY09RkWdlSrn_v8zXyGNGRXctMo1m_6FXsE7X3ik/exec';
-        const data = {
-            name: name,
-            response: response,
-            event: 'Filip - 7 ani - 4 Octombrie 2024'
-        };
-
-        // Submit to Google Apps Script
-        fetch(webAppURL, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json'
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('rsvpForm');
+        const rsvpSection = document.getElementById('rsvpSection');
+        const loadingDiv = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+    
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Stop the form from submitting normally
+    
+            const name = document.getElementById('childName').value.trim();
+            if (!name) {
+                alert('🤭 Hei, nu uita să îți scrii numele!');
+                document.getElementById('childName').focus();
+                return;
             }
-        })
-        .then(() => {
-            // Success
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('A apărut o problemă la trimiterea răspunsului. Încearcă din nou!');
+    
+            // Get the response ("Da" or "Nu") from the button that was clicked
+            const response = event.submitter.value;
+    
+            // Show loading animation
+            form.style.display = 'none';
+            loadingDiv.style.display = 'block';
+    
+            postToGoogle(name, response);
         });
-    }
-</script>
+    
+        async function postToGoogle(name, response) {
+            // !!! REPLACE THESE WITH YOUR ACTUAL VALUES FROM GOOGLE FORMS !!!
+            const formUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf_lpLf60uxlp-zdY1aJ9-UMfy5hgHlnmzc2yrRONcBtSciQg/formResponse"; 
+            const nameEntry = "name=entry.877086558";  // The 'name' for your Name input
+            const responseEntry = "name=entry.1498135098"; // The 'name' for your Response input
+    
+            const formData = new FormData();
+            formData.append(nameEntry, name);
+            formData.append(responseEntry, response);
+    
+            try {
+                await fetch(formUrl, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // Prevents CORS errors
+                });
+                
+                // On success
+                loadingDiv.style.display = 'none';
+                rsvpSection.style.display = 'none'; // Hide the whole form section
+                successMessage.style.display = 'block'; // Show the success message
+    
+            } catch (error) {
+                console.error('Error:', error);
+                alert('A apărut o problemă. Încearcă din nou!');
+                // Reset UI
+                loadingDiv.style.display = 'none';
+                form.style.display = 'block';
+            }
+        }
+    });
+    </script>
 </body>
 
 </html>
+
 
 
 
