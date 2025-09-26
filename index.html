@@ -518,7 +518,6 @@
             <div class="rsvp-title">Vii sau nu vii? 🤔</div>
             <div class="rsvp-subtitle">Spune-ne dacă te alături aventurii!</div>
             
-            <!-- This form will be handled by JavaScript -->
             <form id="rsvpForm">
                 <input 
                     type="text" 
@@ -530,7 +529,6 @@
                 >
                 
                 <div class="response-buttons">
-                    <!-- The buttons now submit the form -->
                     <button type="submit" name="user_response" value="Da" class="response-btn yes-btn">
                         🎉 DAAA! Vin și aduc multă energie! 🎉
                     </button>
@@ -547,10 +545,16 @@
             </div>
         </div>
         
-        <!-- This success message is now outside the RSVP section -->
-        <div class="success-message" id="successMessage" style="display: none; margin: 20px;">
+        <!-- Success message for "Yes" -->
+        <div class="success-message" id="successMessageYes" style="display: none; margin: 20px;">
             🎊 Mulțumesc pentru răspuns! 🎊<br>
             Filip va fi super fericit să știe! 😄
+        </div>
+
+        <!-- NEW: Success message for "No" -->
+        <div class="success-message no-response-message" id="successMessageNo" style="display: none; margin: 20px;">
+            😢 Oh, ce păcat! 😢<br>
+            Îi vom simți lipsa. Mulțumesc pentru răspuns!
         </div>
 
     <script>
@@ -558,11 +562,12 @@
         const form = document.getElementById('rsvpForm');
         const rsvpSection = document.getElementById('rsvpSection');
         const loadingDiv = document.getElementById('loading');
-        const successMessage = document.getElementById('successMessage');
+        // Get references to BOTH success messages
+        const successMessageYes = document.getElementById('successMessageYes');
+        const successMessageNo = document.getElementById('successMessageNo');
     
-        // This part handles the form submission when a button is clicked
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Stop the form from submitting normally
+            event.preventDefault(); 
     
             const name = document.getElementById('childName').value.trim();
             if (!name) {
@@ -571,23 +576,18 @@
                 return;
             }
     
-            // Get the response ("Da" or "Nu") from the button that was clicked
             const response = event.submitter.value;
     
-            // Show loading animation and hide the form
             form.style.display = 'none';
             loadingDiv.style.display = 'block';
     
-            // Call the function to send data to Google
             postToGoogle(name, response);
         });
     
         async function postToGoogle(name, response) {
-            // --- These are the correct values from your form's HTML ---
             const formUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf_lpLf60uxlp-zdY1aJ9-UMfy5hgHlnmzc2yrRONcBtSciQg/formResponse"; 
             const nameEntry = "entry.877086558";
             const responseEntry = "entry.1498135098";
-            // -----------------------------------------------------------
     
             const formData = new FormData();
             formData.append(nameEntry, name);
@@ -597,18 +597,23 @@
                 await fetch(formUrl, {
                     method: 'POST',
                     body: formData,
-                    mode: 'no-cors' // This is important to prevent CORS errors
+                    mode: 'no-cors'
                 });
                 
-                // If the fetch is successful...
+                // On success, hide loading and the form section
                 loadingDiv.style.display = 'none';
-                rsvpSection.style.display = 'none'; // Hide the whole form section
-                successMessage.style.display = 'block'; // Show the success message
+                rsvpSection.style.display = 'none';
+
+                // NEW: Show the correct message based on the response
+                if (response === 'Da') {
+                    successMessageYes.style.display = 'block';
+                } else {
+                    successMessageNo.style.display = 'block';
+                }
     
             } catch (error) {
                 console.error('Error:', error);
                 alert('A apărut o problemă. Încearcă din nou!');
-                // Reset the UI in case of an error
                 loadingDiv.style.display = 'none';
                 form.style.display = 'block';
             }
@@ -618,7 +623,9 @@
 
 </body>
 
+
 </html>
+
 
 
 
